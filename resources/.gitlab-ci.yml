@@ -1,0 +1,26 @@
+
+build_image:
+  stage: build
+  script:
+  - lein uberjar
+  - gcloud docker -- build -t eu.gcr.io/tulos-infra/chasiki:$CI_BUILD_REF -f docker/Dockerfile .
+  - echo "finished stage"
+
+test_image:
+  stage: test
+  script:
+  - lein test
+  # todo - running in docker hangs
+  #- docker run -e "TEST_NS_PREFIX=tulos.chasiki" -t eu.gcr.io/tulos-infra/chasiki:latest /app/run-tests.sh
+  - echo "finished stage"
+
+deploy_image:
+  only:
+  - prod
+  stage: deploy
+  script:
+  - gcloud docker push eu.gcr.io/tulos-infra/chasiki:$CI_BUILD_REF
+  - gcloud docker -- tag eu.gcr.io/tulos-infra/chasiki:$CI_BUILD_REF eu.gcr.io/tulos-infra/chasiki:latest
+  - gcloud docker -- push eu.gcr.io/tulos-infra/chasiki:latest
+  - cat k8/everything.yaml | sed  's/CI_BUILD_REF/'"${CI_BUILD_REF}"'/' | /usr/lib/google-cloud-sdk/bin/kubectl apply -f -
+  - echo "finished stage"

@@ -1,0 +1,7 @@
+{:paths ["src"] :deps {com.unbounce/clojure-dogstatsd-client {:mvn/version "0.7.0"}
+                       datadog/datadog {:mvn/version "1.0.0"}}
+ :aliases {:build {:extra-deps {slipset/deps-deploy {:mvn/version "RELEASE"}
+                                io.github.clojure/tools.build {:git/tag "v0.8.2" :git/sha "ba1a2bf"}}
+                   :paths ["dev"]
+                   :ns-default build}
+           }}

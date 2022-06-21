@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: titan
+  labels:
+    name: titan
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: titan
+    spec:
+      containers:
+        - name: titan
+          image: eu.gcr.io/infra/titan:CI_BUILD_REF
+          imagePullPolicy: Always
+          env:
+            - name: JVM_OPTS
+              value: -Xms200m -Xmx200m
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: repl
+              containerPort: 9876
+          resources:
+                limits:
+                  memory: 250Mi
+                requests:
+                  memory: 250Mi
+      nodeSelector:
+        env: prod
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: jupiter
+spec:
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+    - name: repl
+      port: 9876
+  selector:
+    name: jupiter
+  type: ClusterIP
